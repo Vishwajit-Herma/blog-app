@@ -7,6 +7,7 @@ from .views import (
     BlogDetailView,
     BlogUpdateView,
     BlogDeleteView,
+    BlogDetailGenericView
 )
 
 

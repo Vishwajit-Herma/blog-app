@@ -2,6 +2,8 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
+from django.db.models import F
+
 
 from django.urls import reverse_lazy
 from django.views import View
@@ -112,6 +114,10 @@ class BlogCreateView(LoginRequiredMixin, View):
 def blog_detail(request, slug):
     blog = get_object_or_404(Blog, slug=slug)
 
+    # Increment views safely
+    Blog.objects.filter(pk=blog.pk).update(views=F("views") + 1)
+    blog.refresh_from_db()
+
     return render(request, "blog/blog_detail.html", {"blog": blog})
 
 
@@ -123,15 +129,44 @@ class BlogDetailGenericView(LoginRequiredMixin, DetailView):
     slug_field = "slug"
     slug_url_kwarg = "slug"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+
+        viewed_key = f"viewed_blog_{obj.pk}"
+
+        if not self.request.session.get(viewed_key):
+            Blog.objects.filter(pk=obj.pk).update(views=F("views") + 1)
+            self.request.session[viewed_key] = True
+
+        obj.refresh_from_db()
+        return obj
+
 
 class BlogDetailView(LoginRequiredMixin, View):
 
     def get(self, request, slug):
         blog = get_object_or_404(
-            Blog.objects.prefetch_related("comments__user"), slug=slug
+            Blog.objects.prefetch_related("comments__user"),
+            slug=slug
         )
+
+        # 🔐 Unique session key for this blog
+        viewed_key = f"viewed_blog_{blog.pk}"
+
+        # 🛑 Only increment if not viewed in this session
+        if not request.session.get(viewed_key):
+            Blog.objects.filter(pk=blog.pk).update(
+                views=F("views") + 1
+            )
+            request.session[viewed_key] = True
+            blog.refresh_from_db()  # So updated value shows immediately
+
         form = CommentForm()
-        return render(request, "blog/blog_detail.html", {"blog": blog, "form": form})
+
+        return render(request, "blog/blog_detail.html", {
+            "blog": blog,
+            "form": form
+        })
 
     def post(self, request, slug):
         blog = get_object_or_404(Blog, slug=slug)
@@ -145,8 +180,10 @@ class BlogDetailView(LoginRequiredMixin, View):
 
             return redirect("blog:blog-detail", slug=slug)
 
-        return render(request, "blog/blog_detail.html", {"blog": blog, "form": form})
-
+        return render(request, "blog/blog_detail.html", {
+            "blog": blog,
+            "form": form
+        })
 
 # ---------------------------------------------------------------------------
 
