@@ -146,8 +146,7 @@ class BlogDetailView(LoginRequiredMixin, View):
 
     def get(self, request, slug):
         blog = get_object_or_404(
-            Blog.objects.prefetch_related("comments__user"),
-            slug=slug
+            Blog.objects.prefetch_related("comments__user"), slug=slug
         )
 
         # 🔐 Unique session key for this blog
@@ -155,18 +154,13 @@ class BlogDetailView(LoginRequiredMixin, View):
 
         # 🛑 Only increment if not viewed in this session
         if not request.session.get(viewed_key):
-            Blog.objects.filter(pk=blog.pk).update(
-                views=F("views") + 1
-            )
+            Blog.objects.filter(pk=blog.pk).update(views=F("views") + 1)
             request.session[viewed_key] = True
             blog.refresh_from_db()  # So updated value shows immediately
 
         form = CommentForm()
 
-        return render(request, "blog/blog_detail.html", {
-            "blog": blog,
-            "form": form
-        })
+        return render(request, "blog/blog_detail.html", {"blog": blog, "form": form})
 
     def post(self, request, slug):
         blog = get_object_or_404(Blog, slug=slug)
@@ -180,10 +174,8 @@ class BlogDetailView(LoginRequiredMixin, View):
 
             return redirect("blog:blog-detail", slug=slug)
 
-        return render(request, "blog/blog_detail.html", {
-            "blog": blog,
-            "form": form
-        })
+        return render(request, "blog/blog_detail.html", {"blog": blog, "form": form})
+
 
 # ---------------------------------------------------------------------------
 
