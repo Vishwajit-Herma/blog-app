@@ -1,0 +1,57 @@
+<h1>{{ blog.title }}</h1>
+{% if blog.image %}
+    <img src="{{ blog.image.url }}" width=700">
+{% endif %}
+
+<p>Author: {{ blog.author }}</p>
+<p>{{ blog.content }}</p>
+<small>{{ blog.created_at }}</small>
+{% if blog.is_edited %}
+    <small> | Edited {{ blog.updated_at|timesince }} ago</small>
+{% endif %}
+
+<form method="POST" action="{% url 'blog:blog-like' blog.slug %}">
+    {% csrf_token %}
+    <button type="submit">
+        ❤️ {{ blog.likes.count }}
+    </button>
+</form>
+
+
+{% if request.user == blog.author %}
+<a href="{% url 'blog:blog-update' blog.slug %}">Edit</a>
+<a href="{% url 'blog:blog-delete' blog.slug %}">Delete</a>
+{% endif %}
+
+<h3>Add Comment</h3>
+
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Post Comment</button>
+</form>
+
+<h3>Comments ({{ blog.comments.count }})</h3>
+
+{% for comment in blog.comments.all %}
+    <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
+        <strong>{{ comment.user.username }}</strong>
+        <small>{{ comment.created_at }}</small>
+
+        <p>{{ comment.content }}</p>
+        <form method="POST" action="{% url 'blog:comment-like' comment.id %}">
+            {% csrf_token %}
+            <button type="submit">
+                👍 {{ comment.likes.count }}
+            </button>
+        </form>
+
+        {% if comment.user == request.user %}
+            <a href="{% url 'blog:comment-delete' comment.id %}">Delete</a>
+        {% endif %}
+    </div>
+{% empty %}
+    <p>No comments yet.</p>
+{% endfor %}
+
+

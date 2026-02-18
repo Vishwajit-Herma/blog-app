@@ -1,0 +1,9 @@
+<div>
+    <h2>Are you sure you want to delete this blog post?</h2>
+    <p>{{ blog.title }}</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Yes, Delete</button>
+        <a href="{% url 'blog:blog-detail' blog.slug %}">Cancel</a>
+    </form>
+</div>

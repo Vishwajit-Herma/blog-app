@@ -1,0 +1,9 @@
+<h1?> Welcome! </h1?
+
+<div>
+    <form method="POST" action = "{% url 'logout' %}">
+        {% csrf_token %}
+            {{ form }}
+        <button type="submit"> Logout </button>
+    </form>
+</div>
