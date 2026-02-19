@@ -6,7 +6,8 @@
             {{ form }}
         <button type="submit"> Logout </button>
     </form>
-    <a href="{% url 'blog:notifications' %}">Notifications</a>
+    <a href="{% url 'blog:notifications' %}">  Notifications ({{ unread_notifications }})
+</a>
     <br></br>
     <form method="GET">
     <input type="text" name="q" placeholder="Search..."
