@@ -1,0 +1,12 @@
+<h2>Your Notifications</h2>
+
+<ul>
+  {% for notification in notifications %}
+    <li style="{% if not notification.is_read %}font-weight:bold;{% endif %}">
+      {{ notification.message }}
+      <small>{{ notification.created_at }}</small>
+    </li>
+  {% empty %}
+    <li>No notifications</li>
+  {% endfor %}
+</ul>

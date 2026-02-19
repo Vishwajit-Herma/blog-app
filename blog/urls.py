@@ -7,7 +7,8 @@ from .views import (
     BlogDetailView,
     BlogUpdateView,
     BlogDeleteView,
-    BlogDetailGenericView
+    BlogDetailGenericView,
+    notifications_view,
 )
 
 
@@ -25,6 +26,7 @@ app_name = "blog"
 urlpatterns = [
     path("", BlogListGenericView.as_view(), name="blog-list"),
     path("add/", BlogCreateView.as_view(), name="blog-add"),
+    path("notifications/", notifications_view, name="notifications"),
     path("<slug:slug>/", BlogDetailView.as_view(), name="blog-detail"),
     path("<slug:slug>/update/", BlogUpdateView.as_view(), name="blog-update"),
     path("<slug:slug>/delete/", BlogDeleteView.as_view(), name="blog-delete"),

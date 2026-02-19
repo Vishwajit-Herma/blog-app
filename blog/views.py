@@ -3,8 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.db.models import F
-
-
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import (
@@ -17,7 +17,7 @@ from django.views.generic import (
 
 
 from .forms import BlogForm, CommentForm
-from .models import Blog, Comment, CommentLike, BlogLike
+from .models import Blog, Comment, CommentLike, BlogLike, Notification
 
 
 @login_required
@@ -149,10 +149,10 @@ class BlogDetailView(LoginRequiredMixin, View):
             Blog.objects.prefetch_related("comments__user"), slug=slug
         )
 
-        # 🔐 Unique session key for this blog
+        # Unique session key for this blog
         viewed_key = f"viewed_blog_{blog.pk}"
 
-        # 🛑 Only increment if not viewed in this session
+        # Only increment if not viewed in this session
         if not request.session.get(viewed_key):
             Blog.objects.filter(pk=blog.pk).update(views=F("views") + 1)
             request.session[viewed_key] = True
@@ -305,3 +305,24 @@ def toggle_comment_like(request, pk):
         like.delete()
 
     return redirect("blog:blog-detail", slug=comment.blog.slug)
+
+
+@login_required
+def notifications_view(request):
+    notifications = Notification.objects.filter(user=request.user).order_by(
+        "-created_at"
+    )
+
+    # Get unread IDs first
+    unread_ids = notifications.filter(is_read=False).values_list("id", flat=True)
+
+    response = render(
+        request,
+        "blog/notifications.html",
+        {"notifications": notifications},
+    )
+
+    # Mark them as read AFTER preparing response
+    Notification.objects.filter(id__in=unread_ids).update(is_read=True)
+
+    return response
