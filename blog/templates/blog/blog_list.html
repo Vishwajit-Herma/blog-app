@@ -15,6 +15,8 @@
     <button type="submit">Search</button>
     </form>
 
+<a href="{% url 'blog:popular-blogs' %}">Popular Blogs</a>
+
     <a href="{% url 'blog:blog-add' %}">Add New Blog Post</a>
     {% for blog in blogs %}
         <div><a style="text-decoration: none;" href="{% url 'blog:blog-detail' blog.slug %}">

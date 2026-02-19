@@ -1,0 +1,9 @@
+<h2>Popular Blogs</h2>
+
+<ul>
+  {% for blog in blogs %}
+    <li>
+      {{ blog.title }} — {{ blog.views }} views
+    </li>
+  {% endfor %}
+</ul>

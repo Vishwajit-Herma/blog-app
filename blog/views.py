@@ -17,7 +17,7 @@ from django.views.generic import (
 
 
 from .forms import BlogForm, CommentForm
-from .models import Blog, Comment, CommentLike, BlogLike, Notification
+from .models import Blog, Comment, CommentLike, BlogLike, Notification, PopularBlog
 
 
 @login_required
@@ -326,3 +326,10 @@ def notifications_view(request):
     Notification.objects.filter(id__in=unread_ids).update(is_read=True)
 
     return response
+
+
+
+class PopularBlogListView(ListView):
+    model = PopularBlog
+    template_name = "blog/popular_blogs.html"
+    context_object_name = "blogs"   

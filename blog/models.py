@@ -76,7 +76,6 @@ class BlogLike(models.Model):
 class CommentLike(models.Model):
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name="likes")
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -91,3 +90,12 @@ class Notification(models.Model):
 
     def __str__(self):
         return self.message
+
+
+class PopularBlog(Blog):
+
+    class Meta:
+        proxy = True
+        ordering = ["-views"]
+        verbose_name = "Popular Blog"
+        verbose_name_plural = "Popular Blogs"
