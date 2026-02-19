@@ -3,7 +3,7 @@
 <ul>
   {% for blog in blogs %}
     <li>
-      {{ blog.title }} — {{ blog.views }} views
+      <a href="{% url 'blog:blog-detail' blog.slug %}">{{ blog.title }} — {{ blog.views }} views</a>
     </li>
   {% endfor %}
 </ul>
